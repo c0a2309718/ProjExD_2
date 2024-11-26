@@ -13,6 +13,7 @@ DELTA = {pg.K_UP: (0, -5),
     }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
 def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数で与えられたRectが画面の中か外か判定
@@ -26,6 +27,7 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
     
+
 def game_over(screen: pg.Surface) -> None:
     """
     ゲームオーバー時に画面を暗くし、メッセージと画像を表示する
@@ -57,6 +59,7 @@ def game_over(screen: pg.Surface) -> None:
     # 5秒間停止して表示を維持
     time.sleep(5)
 
+
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     """
     サイズの異なる爆弾Surfaceを要素としたリストと加速度リストを生成して返す
@@ -75,13 +78,15 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
     return bb_imgs, bb_accs 
 
+
 def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
     """
     飛ぶ方向に従ってこうかとん画像を切り替える
     引数：移動量の合計値タプルsum_mv
     戻り値：sum_mvルに対応する向きの画像Surfaceを返す
     """
-    
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -96,7 +101,6 @@ def main():
     clock = pg.time.Clock()
     tmr = 0  
     
-
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
