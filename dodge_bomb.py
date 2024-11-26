@@ -1,8 +1,8 @@
 import os
 import random
 import sys
-import pygame as pg
 
+import pygame as pg
 
 WIDTH, HEIGHT = 1100, 650
 DELTA = {pg.K_UP: (0, -5), 
@@ -12,6 +12,19 @@ DELTA = {pg.K_UP: (0, -5),
     }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数で与えられたRectが画面の中か外か判定
+    引数：こうかとんRect or 爆弾Rect
+    戻り値：真理値タプル（横，縦）/画面内：True、画面外：False
+    """
+    yoko, tate = True, True
+    if rct.left < 0 or WIDTH < rct.right:
+        yoko = False
+    if rct.top < 0 or HEIGHT < rct.bottom:
+        tate = False
+    return yoko, tate
+    
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -42,8 +55,17 @@ def main():
                 sum_mv[0] += tpl[0]
                 sum_mv[1] += tpl[1]
         kk_rct.move_ip(sum_mv)
+        # こうかとんが画面外なら、元の場所に戻す
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip(vx, vy) #爆弾が動く
+        # 爆弾が画面外なら符号を反転
+        yoko, tate = check_bound(bb_rct)
+        if not yoko: #横にはみ出る
+            vx *= -1
+        if not tate: #縦にはみ出る
+            vy *= -1
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
