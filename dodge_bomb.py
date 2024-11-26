@@ -58,6 +58,25 @@ def game_over(screen: pg.Surface) -> None:
     # 5秒間停止して表示を維持
     time.sleep(5)
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    サイズの異なる爆弾Surfaceを要素としたリストと加速度リストを生成して返す
+    戻り値:
+        - bb_imgs: サイズが異なる爆弾Surfaceのリスト
+        - bb_accs: 爆弾の加速度リスト（1から10）
+    """
+    bb_imgs = []  # 爆弾Surfaceのリスト
+    bb_accs = [a for a in range(1, 11)]  # 加速度リスト（1～10）
+
+    for r in range(1, 11):  # 爆弾のサイズを10段階で用意
+        bb_img = pg.Surface((20 * r, 20 * r))  # サイズに応じたSurfaceを生成
+        pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)  # 半径に応じた円を描画
+        bb_img.set_colorkey((0, 0, 0))
+        bb_imgs.append(bb_img)  # リストに追加
+
+    return bb_imgs, bb_accs  # タプルでリストを返す
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -65,15 +84,15 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
-    bb_img  = pg.Surface((20, 20)) #爆弾用の空surface
-    pg.draw.circle(bb_img , (255, 0, 0), (10, 10), 10) #爆弾円を描く
-    bb_img .set_colorkey((0, 0, 0))
-    bb_rct = bb_img.get_rect()
+    # 爆弾の初期化
+    bb_imgs, bb_accs = init_bb_imgs()  # 爆弾Surfaceリストと加速度リストを初期化
+    bb_rct = bb_imgs[0].get_rect()  # 初期爆弾サイズのRectを取得
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-    vx, vy = +5, +5 #爆弾速度ベクトル
+    vx, vy = +5, +5  # 爆弾の基本速度ベクトル
     clock = pg.time.Clock()
-    tmr = 0
+    tmr = 0  
     
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -93,7 +112,16 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy) #爆弾が動く
+        # 爆弾のサイズと加速度を段階的に変化させる
+        avx = vx*bb_accs[min(tmr//500, 9)]# 加速度を適用した横方向速度
+        avy = vy*bb_accs[min(tmr//500, 9)]# 加速度を適用した縦方向速度
+        bb_img = bb_imgs[min(tmr//500, 9)]# 現在の段階の爆弾Surface
+        # 爆弾のRectを更新（中心を維持）
+        bb_center = bb_rct.center  # 現在の中心座標を取得
+        bb_rct = bb_img.get_rect()  # 新しい爆弾Surfaceに基づいてRectを取得
+        bb_rct.center = bb_center  # 中心位置を維持
+
+        bb_rct.move_ip(avx, avy) #爆弾が動く
         # 爆弾が画面外なら符号を反転
         yoko, tate = check_bound(bb_rct)
         if not yoko: #横にはみ出る
